@@ -240,17 +240,9 @@
     .sugg-save { text-align:left; align-self:flex-start; width:100%; display:flex; align-items:baseline; gap:8px; padding-left:48px; }
     .share-bar { padding:14px; }
     .share-bar .btn { flex:1 1 46%; justify-content:center; }
-    /* stack the comparison table into cards — no more side-scrolling */
-    .list-wrap { overflow-x:visible; }
+    /* keep the comparison table as rows on mobile — scaled to fit, no scrollbar (see fitTable() in JS) */
+    .list-wrap { overflow-x:hidden; }
     .gtable { min-width:0; }
-    .thead { display:none; }
-    .grow { display:block; }
-    .grow:not(:last-child) { border-bottom:8px solid var(--surface-2); }
-    .c-have { position:static; border-right:none; border-bottom:1px solid var(--line); padding:13px 14px; }
-    .c-div { display:none; }
-    .c-tier { border-right:none; border-bottom:1px solid var(--line-soft); padding:13px 14px; gap:9px; }
-    .c-tier:last-child { border-bottom:none; }
-    .tier-label-m { display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.7px; font-weight:700; color:var(--pine); }
     .tier-fields2 .fieldlet { flex:1 1 0; }
     .tier-fields2 .cnum { width:100%; }
   }
@@ -474,12 +466,29 @@
   }
 
   function renderList() {
-    if (!items.length) { listEl.innerHTML = '<div class="empty">Your kit is empty. Add gear from the list above, load the sample kit, or add a custom item.</div>'; return; }
+    if (!items.length) { listEl.innerHTML = '<div class="empty">Your kit is empty. Add gear from the list above, load the sample kit, or add a custom item.</div>'; fitTable(); return; }
     listEl.innerHTML = '<div class="list-wrap"><div class="gtable">' +
       '<div class="thead"><div class="th-have">What you have</div><div></div>' +
         '<div class="th-tier">Low tier</div><div class="th-tier">Middle tier</div><div class="th-tier">High tier</div></div>' +
       items.map(rowHTML).join("") + '</div></div>';
+    fitTable();
   }
+
+  // On phones, keep the row-by-row table but scale it down to fit the screen — no horizontal scrollbar.
+  function fitTable() {
+    var wrap = listEl.querySelector('.list-wrap'), gt = wrap && wrap.querySelector('.gtable');
+    if (!wrap || !gt) return;
+    if (window.innerWidth > 760) { gt.style.transform = ""; gt.style.transformOrigin = ""; gt.style.width = ""; wrap.style.height = ""; return; }
+    var design = 640;
+    gt.style.transformOrigin = "top left";
+    gt.style.width = design + "px";
+    gt.style.transform = "none";
+    var scale = wrap.clientWidth / design; if (scale > 1) scale = 1;
+    var h = gt.offsetHeight;
+    gt.style.transform = "scale(" + scale + ")";
+    wrap.style.height = Math.ceil(h * scale) + "px";
+  }
+  window.addEventListener("resize", fitTable);
 
   function replaceRow(it) {
     var node = document.querySelector('[data-card="' + it.id + '"]');
