@@ -240,11 +240,9 @@
     .sugg-save { text-align:left; align-self:flex-start; width:100%; display:flex; align-items:baseline; gap:8px; padding-left:48px; }
     .share-bar { padding:14px; }
     .share-bar .btn { flex:1 1 46%; justify-content:center; }
-    /* keep the comparison table as rows on mobile — scaled to fit, no scrollbar (see fitTable() in JS) */
+    /* keep the full desktop row table on mobile, just zoomed down to fit — no scrollbar (fitTable() in JS) */
     .list-wrap { overflow-x:hidden; }
-    .gtable { min-width:0; }
-    .tier-fields2 .fieldlet { flex:1 1 0; }
-    .tier-fields2 .cnum { width:100%; }
+    .c-have, .thead .th-have { position:static; }
   }
   @media (max-width:420px) {
     .summary { grid-template-columns:1fr 1fr; }
@@ -474,19 +472,14 @@
     fitTable();
   }
 
-  // On phones, keep the row-by-row table but scale it down to fit the screen — no horizontal scrollbar.
+  // On phones, shrink the whole desktop row table to fit the screen with CSS zoom (reflows — no overlap, no scrollbar).
   function fitTable() {
     var wrap = listEl.querySelector('.list-wrap'), gt = wrap && wrap.querySelector('.gtable');
     if (!wrap || !gt) return;
-    if (window.innerWidth > 760) { gt.style.transform = ""; gt.style.transformOrigin = ""; gt.style.width = ""; wrap.style.height = ""; return; }
-    var design = 640;
-    gt.style.transformOrigin = "top left";
-    gt.style.width = design + "px";
-    gt.style.transform = "none";
-    var scale = wrap.clientWidth / design; if (scale > 1) scale = 1;
-    var h = gt.offsetHeight;
-    gt.style.transform = "scale(" + scale + ")";
-    wrap.style.height = Math.ceil(h * scale) + "px";
+    gt.style.zoom = "1";
+    if (window.innerWidth > 760) return;
+    var natural = gt.offsetWidth, avail = wrap.clientWidth;
+    if (avail > 0 && natural > avail) gt.style.zoom = (avail / natural);
   }
   window.addEventListener("resize", fitTable);
 
