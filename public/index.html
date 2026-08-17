@@ -240,9 +240,36 @@
     .sugg-save { text-align:left; align-self:flex-start; width:100%; display:flex; align-items:baseline; gap:8px; padding-left:48px; }
     .share-bar { padding:14px; }
     .share-bar .btn { flex:1 1 46%; justify-content:center; }
-    /* keep the full desktop row table on mobile, just zoomed down to fit — no scrollbar (fitTable() in JS) */
+    /* mobile: compact 4-column table (your item + low/middle/high) that fits with no scroll */
     .list-wrap { overflow-x:hidden; }
+    .gtable { min-width:0; }
+    .thead, .grow { grid-template-columns:1.15fr 1fr 1fr 1fr; }
+    .c-div, .thead > div:nth-child(2) { display:none; }
+    .c-have, .c-tier, .thead > div, .name-input, .tier-prod, .cnum, .inrow { min-width:0; }
     .c-have, .thead .th-have { position:static; }
+    .thead > div { padding:6px 5px; font-size:8.5px; letter-spacing:.2px; }
+    .c-have { padding:8px 6px; border-right:1px dashed var(--line); }
+    .c-tier { padding:8px 6px; }
+    .cat-chip { display:none; }
+    .name-input { font-size:12px; padding:2px 3px; }
+    .have-top { gap:4px; margin-bottom:6px; }
+    .del { width:20px; height:20px; font-size:16px; }
+    .have-nums { flex-direction:column; gap:6px; align-items:stretch; }
+    .flab { font-size:8px; }
+    .skip-link { font-size:9.5px; margin-top:6px; }
+    .tier-row1 { gap:4px; }
+    .radio { width:13px; height:13px; }
+    .radio::after { width:6px; height:6px; }
+    .tier-prod { font-size:10.5px; padding:1px 2px; }
+    .tier-fields2 { flex-direction:column; gap:5px; }
+    .tier-fields2 .fieldlet { flex:1 1 auto; }
+    .cnum { width:100%; font-size:11.5px; padding:4px 5px; text-align:left; }
+    .inrow { gap:3px; }
+    .inrow .pre, .unit { font-size:9px; }
+    .tier-metric { flex-wrap:wrap; gap:3px 6px; padding-top:5px; }
+    .tier-metric .save, .tier-metric .per { font-size:10.5px; }
+    .tier-metric .hint { font-size:9px; }
+    .c-tier.show-best .best-badge, .best-badge { display:none; }
   }
   @media (max-width:420px) {
     .summary { grid-template-columns:1fr 1fr; }
@@ -464,24 +491,12 @@
   }
 
   function renderList() {
-    if (!items.length) { listEl.innerHTML = '<div class="empty">Your kit is empty. Add gear from the list above, load the sample kit, or add a custom item.</div>'; fitTable(); return; }
+    if (!items.length) { listEl.innerHTML = '<div class="empty">Your kit is empty. Add gear from the list above, load the sample kit, or add a custom item.</div>'; return; }
     listEl.innerHTML = '<div class="list-wrap"><div class="gtable">' +
       '<div class="thead"><div class="th-have">What you have</div><div></div>' +
         '<div class="th-tier">Low tier</div><div class="th-tier">Middle tier</div><div class="th-tier">High tier</div></div>' +
       items.map(rowHTML).join("") + '</div></div>';
-    fitTable();
   }
-
-  // On phones, shrink the whole desktop row table to fit the screen with CSS zoom (reflows — no overlap, no scrollbar).
-  function fitTable() {
-    var wrap = listEl.querySelector('.list-wrap'), gt = wrap && wrap.querySelector('.gtable');
-    if (!wrap || !gt) return;
-    gt.style.zoom = "1";
-    if (window.innerWidth > 760) return;
-    var natural = gt.offsetWidth, avail = wrap.clientWidth;
-    if (avail > 0 && natural > avail) gt.style.zoom = (avail / natural);
-  }
-  window.addEventListener("resize", fitTable);
 
   function replaceRow(it) {
     var node = document.querySelector('[data-card="' + it.id + '"]');
